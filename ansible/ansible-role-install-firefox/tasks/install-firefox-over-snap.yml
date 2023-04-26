@@ -1,0 +1,48 @@
+---
+- name: Install Firefox {{ firefox_edition }} 4 any Linux over Snapd
+  when:
+    - ansible_architecture == 'x86_64'
+    - firefox_edition == 'stable'
+  snap:
+    name: firefox
+    channel: latest/stable
+    state: present
+  tags:
+    - linux
+    - firefox
+    - snap
+    - snapd
+    - install
+    - stable
+
+- name: Install Firefox {{ firefox_edition }} 4 any Linux over Snapd
+  when:
+    - ansible_architecture == 'x86_64'
+    - firefox_edition == 'beta'
+  snap:
+    name: firefox
+    channel: latest/beta
+    state: present
+  tags:
+    - linux
+    - firefox
+    - snap
+    - snapd
+    - install
+    - beta
+
+- name: Install Firefox {{ firefox_edition }} 4 any Linux over Snapd
+  when:
+    - ansible_architecture == 'x86_64'
+    - firefox_edition == 'esr'
+  snap:
+    name: firefox
+    channel: esr/stable
+    state: present
+  tags:
+    - linux
+    - firefox
+    - snap
+    - snapd
+    - install
+    - esr

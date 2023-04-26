@@ -1,0 +1,19 @@
+---
+
+- name: Install other programs
+  hosts: localhost
+  tasks:
+    - name: Creating temporary file for VScode
+      tempfile:
+        state: file
+      register: temp_file
+
+    - name: Download VScode
+      get_url:
+        url: "http://go.microsoft.com/fwlink/?LinkID=760868"
+        dest: "{{ temp_file.path }}"
+
+    - name: Install VScode
+      apt:
+        deb: "{{ temp_file.path }}"
+

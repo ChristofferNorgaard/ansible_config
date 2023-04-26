@@ -1,0 +1,98 @@
+---
+- name: Basic setup of debian server
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Add non-free component to apt.sources.list
+      lineinfile:
+        path: /etc/apt/sources.list
+        line: 'deb http://deb.debian.org/debian/ {{ ansible_lsb.codename }} main contrib non-free'
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+    
+    - name: Install nvidia drivers
+      apt:
+        name: [nvidia-driver]
+
+    - name: Install x11
+      apt:
+        name: [xorg, dmenu, build-essential, libx11-dev, libxinerama-dev, libxft-dev, git]
+
+    - name: Install sxhkd
+      apt:
+        name: sxhkd
+    - name: Install audio utils
+      apt:
+        name: [alsa-utils, pulseaudio]
+
+    - name: Create config directory
+      file:
+        path: /home/jakob/.config
+        state: directory
+    - name: Set correct ownership for .config
+      command: chown jakob /home/jakob/.config
+
+    - name: Create a suckless folder
+      file:
+        path: /home/jakob/.config/suckless
+        state: directory
+
+    - name: Check if dwm install exists
+      stat:
+        path: /home/jakob/.config/suckless/dwm
+      register: dwm_path
+
+    - name: Clone dwm
+      git:
+        repo: "https://github.com/ChristofferNorgaard/dwm"
+        dest: /home/jakob/.config/suckless/dwm
+      when: not dwm_path.stat.exists
+
+    - name: Check if slstatus install exists
+      stat:
+        path: /home/jakob/.config/suckless/dwm
+      register: slstatus_path
+
+    - name: Install dwm
+      command: make clean install
+      args:
+        chdir: /home/jakob/.config/suckless/dwm
+
+    - name: Download font for slstatus
+      get_url:
+        url: "https://github.com/Templarian/MaterialDesign-Font/raw/master/MaterialDesignIconsDesktop.ttf"
+        dest: /usr/local/share/fonts/MaterialDesignIconsDesktop.ttf
+
+    - name: Clone slstatus
+      git:
+        repo: "https://github.com/ChristofferNorgaard/slstatus"
+        dest: /home/jakob/.config/suckless/slstatus
+      when: not  slstatus_path.stat.exists
+
+    - name: Check if sxhkd install exists
+      stat:
+        path: /home/jakob/.config/sxhkd
+      register: sxhkd_path
+
+    - name: Download sxhkd config
+      git:
+        repo: "https://github.com/ChristofferNorgaard/sxhkd"
+        dest: /home/jakob/.config/sxhkd
+      when: not sxhkd_path.stat.exists
+
+    - name: Install slstatus
+      command: make clean install
+      args:
+        chdir: /home/jakob/.config/suckless/slstatus
+    - name: Create xinit
+      copy:
+        content: "pulseaudio&\nslstatus&\n sxhkd& \n exec dwm"
+        dest: /home/jakob/.xinitrc
+
+    - name: Install fish
+      apt:
+        name: [fish]
+    
